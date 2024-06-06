@@ -3,7 +3,20 @@ from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 import requests
 from werkzeug.security import check_password_hash, generate_password_hash
-import sqlite3
+
+# supa
+import os
+from supabase import create_client, Client
+from supabase.client import ClientOptions
+
+url = "https://bkfmmzqhbrrkhytyjrul.supabase.co"
+key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZm1tenFoYnJya2h5dHlqcnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3MDY3ODYsImV4cCI6MjAzMzI4Mjc4Nn0.jpkTshBGvMiPitAvG54VxFH90d_Cv8fMw1VcEtKiVj0"
+supabase: Client = create_client(url, key,
+  options=ClientOptions(
+    postgrest_client_timeout=10,
+    storage_client_timeout=10,
+    schema="public",
+  ))
 
 #tmdb
 import tmdbsimple as tmdb
@@ -16,10 +29,6 @@ app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
-
-conn = sqlite3.connect("filmmate.db", check_same_thread=False)
-conn.row_factory = sqlite3.Row
-db = conn.cursor()
 
 @app.route("/")
 def index():
@@ -42,16 +51,14 @@ def signup():
             return "bruh"
         
         # check if already exists
-        rows = db.execute("SELECT * FROM users WHERE username = ?",  (username,)).fetchall()
-        print(rows)
-        if rows:
+        rows = supabase.table('users').select('*').eq('username', username).execute()
+        if rows.data:
            return "already exists bro" 
         
         hash = generate_password_hash(password)
         
-        db.execute("INSERT INTO users (username, hash) VALUES (?,?)", (username, hash) )
-        conn.commit()
-        
+        data, count = supabase.table('users').insert({"username": username, "hash": hash}).execute()
+
         return redirect("/login")
         
         
@@ -70,18 +77,15 @@ def login():
         if not username or not password:
             return "bruh"
         
-        # user_password = db.get(username, None)
-        rows = db.execute("SELECT id, hash FROM users WHERE username = ?",  (username,))
-        # https://stackoverflow.com/questions/3300464/how-can-i-get-dict-from-sqlite-query#comment91011721_41920171
-        result = [dict(row) for row in rows.fetchall()]
+        data, count = supabase.table('users').select('id, hash').eq('username', username).execute()
         
-        if not result:
+        if not data[1]:
+            return 'Wrong username or password'
+        
+        if not check_password_hash(data[1][0]["hash"], password):
             return "Wrong username or password"
         
-        if not check_password_hash(result[0]["hash"], password):
-            return "Wrong username or password"
-        
-        session["user_id"] = result[0]["id"]
+        session["user_id"] = data[1][0]["id"]
         session["username"] = username
         
         return redirect("/dashboard")
@@ -171,20 +175,18 @@ def movies(id):
     
     similar = get_similar_movies(data)
     
-    rows = db.execute("SELECT movie_id FROM movie_watchlist WHERE user_id = ? AND movie_id = ?", (session['user_id'], id))
-    result = rows.fetchall()
-    
-    onwatchlist = None
-    if result:
+    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', session['user_id']).eq('movie_id', id).execute()
+
+    onwatchlist = False
+    if data[1]:
         onwatchlist = True
     
     # ratings
-    rows = db.execute("SELECT * FROM ratings WHERE rated_item_id = ?", (id,))
-    result = rows.fetchall()
+    data, count = supabase.from_('ratings').select('*').eq('rated_item_id', id).execute()
     
     ratings = []
 
-    for res in result:
+    for res in data[1]:
         rating = {}
         rating["username"] = get_username(res["user_id"])
         rating["rating"] = res["rating_value"]
@@ -195,10 +197,9 @@ def movies(id):
 
 def get_username(user_id):
     
-    rows = db.execute("SELECT username FROM users WHERE id = ?", (user_id,))
-    result = rows.fetchall()
-        
-    return result[0]["username"]
+    data, count = supabase.from_('users').select('username').eq('id', user_id).execute()
+
+    return data[1][0]["username"]
     
 
 def get_similar_movies(self):
@@ -246,12 +247,7 @@ def rate_movie(id):
     if not actual_rating:
         return 'bruh'
     
-    try:
-        db.execute("INSERT INTO ratings (user_id, rated_item_id, rating_value) VALUES (?,?,?)", (session["user_id"], id, actual_rating))
-    except sqlite3.IntegrityError:
-        db.execute("UPDATE ratings SET (rating_value) = ? WHERE user_id = ?", (actual_rating, session["user_id"]))
-    
-    conn.commit()
+    data, count = supabase.table('ratings').upsert({'user_id': session["user_id"], 'rated_item_id': id, 'rating_value': actual_rating}).execute()
 
     return redirect(request.referrer)
 
@@ -261,11 +257,9 @@ def add_to_movie_watchlist(id):
         return 'bruh'
     
     try:
-        db.execute("INSERT INTO movie_watchlist (user_id, movie_id) VALUES (?,?)", (session["user_id"], id))
-        conn.commit()
-    except sqlite3.IntegrityError:
-        db.execute("DELETE FROM movie_watchlist WHERE user_id = ? AND movie_id = ?", (session["user_id"], id))
-        conn.commit()
+        data, count = supabase.table('movie_watchlist').insert({'user_id': session["user_id"], 'movie_id': id}).execute()
+    except:
+        data, count = supabase.table('movie_watchlist').delete().eq('user_id', session["user_id"]).eq('movie_id', id).execute()
     
     return redirect(request.referrer)
 
@@ -274,17 +268,15 @@ def watchlist(username):
     if not username:
         return 'bruh'
 
-    rows = db.execute("SELECT id FROM users WHERE username = ?",  (username,))
-    row = rows.fetchall()
+    data, count = supabase.from_('users').select('id').eq('username', username).execute()
     
-    rows = db.execute("SELECT movie_id FROM movie_watchlist WHERE user_id = ?", (row[0]['id'],))
-    results = rows.fetchall()
+    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', data[1]["id"]).execute()
     
-    if not results:
+    if not data[1]:
         return render_template("watchlist.html", watchlist=None)
     
     arr = []
-    for id in results:
+    for id in data[1]:
         data = tmdb.Movies(id['movie_id'])
         response = data.info()
         arr.append(response)
