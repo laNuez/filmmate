@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<style>
+    .poster {
+        width: 94px;
+    }
+</style>
+<section class="section">
+    <div class="container">
+        {% for result in results %}
+        <a href="/movies/{{result['id']}}">
+
+        
+            <div class="box">
+                <div class="columns">
+                    <div class="column is-narrow">
+                        <div class="poster">
+                            <figure class="image">
+                                <img src="https://media.themoviedb.org/t/p/w200{{result['poster_path']}}" alt="poster">
+                            </figure>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <p class="has-text-white" >{{ result['title'] }} <span class="has-text-grey-light">({{ result['original_title'] }})</span></p>
+                        <p>{{result['overview']}}</p>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+        <nav class="pagination" role="navigation" aria-label="pagination">
+            <!-- <a href="#" class="pagination-previous">Previous</a>
+            <a href="#" class="pagination-next">Next page</a> -->
+            <ul class="pagination-list">
+                {% for n in range(total_page) %}
+                <li>
+                    <a href="" class="pagination-link" aria-label="Goto page {{n+1}}">{{n+1}}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</section>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const links = document.querySelectorAll('.pagination-link')
+        const urlParams = new URLSearchParams(window.location.search)
+
+        links.forEach((e, i) => {
+            urlParams.set('page', i + 1)
+            e.setAttribute('href', `${window.location.pathname}?${urlParams}`)
+        })
+    })
+</script>
+{% endblock %}

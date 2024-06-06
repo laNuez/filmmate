@@ -1,0 +1,29 @@
+<div class="box">
+
+    <article class="media">
+        <figure class="media-left">
+            <p class="image is-64x64">
+                <img src="" alt="user image profile">
+            </p>
+        </figure>
+        <div class="media-content">
+            <div class="content">
+                <p>
+                    <strong>@{{rating['username']}}</strong>
+                    <br>
+                    {% for n in range(4) %}
+                        {% if n < rating['rating'] %}
+                            <span class="icon is-small">
+                                <i class="fas fa-star"></i>
+                            </span>
+                        {% else %}
+                            <span class="icon is-small">
+                                <i class="far fa-star"></i>
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+    </article>
+</div>
