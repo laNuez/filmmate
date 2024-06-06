@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">
+            Welcome {{ session['username'] }}
+        </h1>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <h2 class="title">Movies</h2>
+        <hr>
+        <h2 class="title is-4">Trending</h2>
+        <div class="fixed-grid has-5-cols">
+            <div class="grid">
+            {% for movie in movies %}
+            <div class="cell">
+                <a href="/movies/{{movie['id']}}">
+                    <figure class="image is-16by9">
+                        <img src="{{movie['backdrop_path']}}" alt="">
+                    </figure>
+                </a>
+                {{movie["title"]}}
+            </div>
+            {% endfor %}
+            </div>
+        </div>
+        <!-- <h2 class="title is-4">Popular</h2>
+        <div class="fixed-grid has-5-cols">
+            <div class="grid">
+            {% for movie in popular %}
+            <div class="cell">
+                <a href="/movies/{{movie['id']}}">
+                    <figure class="image is-16by9">
+                        <img src="{{movie['backdrop_path']}}" alt="">
+                    </figure>
+                </a>
+                {{movie["title"]}}
+            </div>
+            {% endfor %}
+            </div>
+        </div> -->
+    </div>
+</section>
+{% endblock %}

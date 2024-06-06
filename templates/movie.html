@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<style>
+    .right {
+        justify-content: flex-end;
+    }
+    .poster {
+        width: 300px;
+    }
+    .overflow {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        padding-right: 10px;
+    }
+</style>
+<section class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column is-one-third">
+                <div class="poster">
+                    <figure class="image">
+                        <img src="{{ movie['poster_path'] }}" alt="">
+                    </figure>
+                </div>
+            </div>
+            <div class="column">
+                <div class="backdrop">
+                    <figure class="image is-16by9">
+                        {% if movie['backdrop'] %}
+                        <img src="{{ movie['backdrop'] }}" alt="">
+                        {% else %}
+                        <img src="" alt="missing banner">
+                        {% endif %}
+                    </figure>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <h1 class="title">{{ movie['original_title'] }}</h1>
+            <span class="subtitle">{{ movie['genres'][0]['name'] }}</span>
+        </div>
+        <div class="block">
+            <div class="buttons">
+                <a class="button is-white" target="_blank" href="https://vidsrc.xyz/embed/movie?tmdb={{ movie['id'] }}&ds_lang=es">
+                    <span>Watch on</span>
+                    <span class="icon">
+                        <i class="fas fa-skull-crossbones"></i>
+                    </span>
+                </a>
+                <form action="/watchlist/movies/{{ movie['id'] }}" method="post">
+                    {% if onwatchlist %}
+                    <button title="Saved" class="button is-active" type="submit">
+                        <span class="icon is-small">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    </button>
+                    {% else %}
+                    <button title="Add to watchlist" class="button" type="submit">
+                        <span class="icon is-small">
+                            <i class="fas fa-plus"></i>
+                        </span>
+                    </button>
+                    {% endif %}
+                </form>
+                <button class="js-modal-trigger button" data-target="modal-js-example" title="Mark as seen" type="submit">
+                    <span class="icon is-small">
+                        <i class="fas fa-check"></i>
+                    </span>
+                </button>
+                {% include "rate.html" %}
+            </div>
+        </div>
+        <div class="block">
+            <p>{{ movie['overview'] }}</p>
+        </div>
+        <div class="block">
+        <div class="columns">
+            <div class="column is-three-fifths">
+                <h2 class="has-text-white">Starring</h2>
+                <!-- thank you copilot -->
+                {% set star_names = [] %}
+                {% for star in movie['cast'] %}
+                    {% set _ = star_names.append(star['name']) %}
+                {% endfor %}
+                {{ ', '.join(star_names) }}
+            </div>
+            <div class="column">
+                <h2 class="has-text-white">Directed By</h2>
+                {{ movie['director'] }}
+            </div>
+            <div class="column">
+                <h2 class="has-text-white">Written By</h2>
+                {{ movie.writters | join(', ') }}
+            </div>
+        </div>
+
+        <div class="columns">
+            <div class="column">
+                <span class="icon-text">
+                    <span class="icon has-text-white">
+                      <i class="fas fa-film"></i>
+                    </span>
+                    <span>Genre</span>
+                </span>
+            </div>
+            <div class="column">
+                <div class="tags right">
+                    {% for genre in movie['genres'] %}
+                        <span class="tag is-dark">{{genre['name']}}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="column">
+                <span class="icon-text">
+                    <span class="icon has-text-white">
+                      <i class="far fa-calendar"></i>
+                    </span>
+                    <span>Release Date</span>
+                </span>
+            </div>
+            <div class="column">
+                <div class="tags right has-text-white">
+                    <time datetime="{{ movie['release_date'] }}"></time>
+                    <p>{{ movie['formatted_date'] }}</p>
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <h3 class="title is-5">User ratings</h3>
+        {% for rating in ratings %}
+        {% include "ratings_boxes.html" %}
+        {% endfor %}
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <h3 class="title is-5">More like this</h3>
+            <div class="grid is-col-min-8">
+            {% for movie in similar %}
+            <div class="cell">
+                <a href="/movies/{{movie['id']}}">
+                    <figure class="image is-16by9">
+                        {% if movie['backdrop_path'] %}
+                            <img src="{{movie['backdrop_path']}}" alt="">
+                        {% else %}
+                            <img src="" alt="missing banner">
+                        {% endif %}
+                    </figure>
+                </a>
+                <span class="has-text-white">{{movie["title"]}}</span>
+                <br>
+                <div class="overflow">{{movie['overview']}}</div>
+            </div>
+            {% endfor %}
+            </div>
+    </div>
+</section>
+
+{% endblock %}
+
