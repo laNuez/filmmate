@@ -4,6 +4,8 @@ from flask_session import Session
 import requests
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from helpers import login_required
+
 # supa
 import os
 from supabase import create_client, Client
@@ -81,11 +83,13 @@ def login():
         
         if not data[1]:
             return 'Wrong username or password'
-        
+
         if not check_password_hash(data[1][0]["hash"], password):
             return "Wrong username or password"
         
         session["user_id"] = data[1][0]["id"]
+        print('HERE!!!!')
+        print(data[1][0]["id"])
         session["username"] = username
         
         return redirect("/dashboard")
@@ -99,6 +103,7 @@ def logout():
     return redirect("/")
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     movies = tmdb.Trending("movie")
     response = movies.info()
@@ -125,6 +130,7 @@ def dashboard():
     return render_template("dashboard.html", movies=movies_list)
 
 @app.route("/movies/<id>")
+@login_required
 def movies(id):
     if not id:
         return 'bruh'
@@ -200,7 +206,6 @@ def get_username(user_id):
     data, count = supabase.from_('users').select('username').eq('id', user_id).execute()
 
     return data[1][0]["username"]
-    
 
 def get_similar_movies(self):
     movies = tmdb.Movies.recommendations(self)
@@ -223,6 +228,7 @@ def get_similar_movies(self):
     return arr
 
 @app.route("/rate/movies/<id>", methods=["POST"])
+@login_required
 def rate_movie(id):
     if not id:
         return 'bruh'
@@ -252,6 +258,7 @@ def rate_movie(id):
     return redirect(request.referrer)
 
 @app.route("/watchlist/movies/<id>", methods=["POST"])
+@login_required
 def add_to_movie_watchlist(id):
     if not id:
         return 'bruh'
@@ -264,13 +271,13 @@ def add_to_movie_watchlist(id):
     return redirect(request.referrer)
 
 @app.route('/users/<username>/watchlist')
+@login_required
 def watchlist(username):
     if not username:
         return 'bruh'
 
     data, count = supabase.from_('users').select('id').eq('username', username).execute()
-    
-    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', data[1]["id"]).execute()
+    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', data[1][0]["id"]).execute()
     
     if not data[1]:
         return render_template("watchlist.html", watchlist=None)
@@ -291,8 +298,9 @@ def watchlist(username):
         new_arr.append(dict)
     
     return render_template("watchlist.html", watchlist=new_arr)
-    
+
 @app.route("/search")
+@login_required    
 def search():
     q = request.args.get('query', None)
     page = request.args.get('page', 1)
