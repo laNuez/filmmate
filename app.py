@@ -88,8 +88,6 @@ def login():
             return "Wrong username or password"
         
         session["user_id"] = data[1][0]["id"]
-        print('HERE!!!!')
-        print(data[1][0]["id"])
         session["username"] = username
         
         return redirect("/dashboard")
