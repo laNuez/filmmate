@@ -39,8 +39,8 @@
             </div>
         </div>
         <div class="block">
-            <h1 class="title">{{ movie['original_title'] }}</h1>
-            <span class="subtitle is-6">{{ movie['genres'][0]['name']}} · {{movie['year']}} · {{movie['runtime']}}</span>
+            <h1 class="title" style="margin-bottom: 0.25rem;">{{ movie['original_title'] }}</h1>
+            <h2 class="subtitle is-6">{{ movie['genres'][0]['name']}} · {{movie['year']}} · {{movie['runtime']}}</h2>
         </div>
         <div class="block">
             <div class="buttons">
@@ -166,9 +166,9 @@
                 <a href="/movies/{{movie['id']}}">
                     <figure class="image is-16by9 fig_card">
                         {% if movie['backdrop_path'] %}
-                            <img class="img_card" src="{{movie['backdrop_path']}}" alt="">
+                            <img loading="lazy" class="img_card" src="{{movie['backdrop_path']}}" alt="">
                         {% else %}
-                            <img src="" alt="missing banner">
+                            <img loading="lazy" src="" alt="missing banner">
                         {% endif %}
                     </figure>
                 </a>
