@@ -189,15 +189,33 @@ def movies(id):
     data, count = supabase.from_('ratings').select('*').eq('rated_item_id', id).execute()
     
     ratings = []
-
+    
     for res in data[1]:
         rating = {}
         rating["username"] = get_username(res["user_id"])
         rating["rating"] = res["rating_value"]
+        rating["rating_text"] = get_rating_text(res["rating_value"])
         rating["timestamp"] = res["created_at"]
         ratings.append(rating)
+
+    # current rating for the current user
+    data, count = supabase.from_('ratings').select('rating_value').eq('user_id', session["user_id"]).eq('rated_item_id', id).execute()
+    current_rating = get_rating_text(data[1][0]["rating_value"]) if data[1] else None
     
-    return render_template("movie.html", movie=dict, similar=similar, onwatchlist=onwatchlist, ratings=ratings)
+    return render_template("movie.html", movie=dict, similar=similar, onwatchlist=onwatchlist, ratings=ratings, current_rating=current_rating)
+
+def get_rating_text(rating: int):
+    match rating:
+        case 1:
+            return "awful"
+        case 2:
+            return "meh"    
+        case 3:
+            return "good"
+        case 4:
+            return "amazing"
+        case _:
+            return 'none'
 
 def get_username(user_id):
     
@@ -231,6 +249,11 @@ def rate_movie(id):
     if not id:
         return 'bruh'
     
+    clear = request.form.get('clear')
+    if clear == 'true':
+        data, count = supabase.table('ratings').delete().eq('user_id', session["user_id"]).eq('rated_item_id', id).execute()
+        return redirect(request.referrer)
+        
     rating = request.form.get('rating')
     
     if not rating:
@@ -253,6 +276,12 @@ def rate_movie(id):
     
     data, count = supabase.table('ratings').upsert({'user_id': session["user_id"], 'rated_item_id': id, 'rating_value': actual_rating}).execute()
 
+    # remove from watchlist if it exists
+    try:
+        data, count = supabase.table('movie_watchlist').delete().eq('user_id', session["user_id"]).eq('movie_id', id).execute()
+    except:
+        ""
+    
     return redirect(request.referrer)
 
 @app.route("/watchlist/movies/<id>", methods=["POST"])
@@ -306,3 +335,22 @@ def search():
     res = tmdb.Search.movie(tmdb.Search(),query=q, page=page)
     print(res['total_pages'])
     return render_template("search.html", results=res['results'], current_page=res['page'], total_page=res['total_pages'])
+
+@app.route("/users/<username>/rated")
+def rated(username):
+    data, count = supabase.from_('users').select('id').eq('username', username).execute()
+    user_id = data[1][0]["id"]
+    data, count = supabase.from_('ratings').select('rated_item_id').eq('user_id', user_id).execute()
+
+    movie_list = []
+    for id in data[1]:
+        dict = {}
+        data = tmdb.Movies(id["rated_item_id"])
+        response = data.info(append_to_response="images")
+        dict["poster_path"] = "https://image.tmdb.org/t/p/w300/{}".format(response["poster_path"])
+        dict["title"] = response["title"]
+        dict["id"] = response["id"]
+        movie_list.append(dict)
+    
+    return render_template('rated.html', movies=movie_list)
+    

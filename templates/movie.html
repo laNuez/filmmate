@@ -50,26 +50,37 @@
                         <i class="fas fa-skull-crossbones"></i>
                     </span>
                 </a>
+                {% if onwatchlist %}
                 <form action="/watchlist/movies/{{ movie['id'] }}" method="post">
-                    {% if onwatchlist %}
                     <button title="Saved" class="button is-active" type="submit">
                         <span class="icon is-small">
-                            <i class="fas fa-check"></i>
+                            <i class="fas fa-bookmark"></i>
                         </span>
                     </button>
-                    {% else %}
-                    <button title="Add to watchlist" class="button" type="submit">
-                        <span class="icon is-small">
-                            <i class="fas fa-plus"></i>
-                        </span>
-                    </button>
-                    {% endif %}
                 </form>
-                <button class="js-modal-trigger button" data-target="modal-js-example" title="Mark as seen" type="submit">
+                {% elif current_rating %}
+                {% else %}
+                    <form action="/watchlist/movies/{{ movie['id'] }}" method="post">                
+                        <button title="Add to watchlist" class="button" type="submit">
+                            <span class="icon is-small">
+                                <i class="far fa-bookmark"></i>
+                            </span>
+                        </button>
+                    </form>
+                {% endif %}
+                {% if current_rating %}
+                <button class="js-modal-trigger button is-active" data-target="modal-js-example" title="{{current_rating[0]|upper}}{{current_rating[1:]}}" type="button">
                     <span class="icon is-small">
                         <i class="fas fa-check"></i>
                     </span>
                 </button>
+                {% else %}
+                <button class="js-modal-trigger button" data-target="modal-js-example" title="Mark as seen" type="button">
+                    <span class="icon is-small">
+                        <i class="fas fa-check"></i>
+                    </span>
+                </button>
+                {% endif %}
                 {% include "rate.html" %}
             </div>
         </div>
@@ -134,6 +145,7 @@
         </div>
     </div>
 </section>
+{% if ratings %}
 <section class="section">
     <div class="container">
         <h3 class="title is-5">User ratings</h3>
@@ -142,6 +154,7 @@
         {% endfor %}
     </div>
 </section>
+{% endif %}
 <section class="section">
     <div class="container">
         <h3 class="title is-5">More like this</h3>

@@ -9,6 +9,29 @@
         margin-left: auto;
         margin-right: auto;
     }
+    .clear {
+      /* width: 40%; */
+      padding-left: 30%;
+      padding-right: 30%;
+      display: flex;
+    }
+
+    .button[value="awful"].current,
+    .button[value="awful"]:hover {
+      background-color: #869fb4;
+    }
+    .button[value="good"].current,
+    .button[value="good"]:hover {
+      background-color: #99896d;
+    }
+    .button[value="meh"].current,
+    .button[value="meh"]:hover {
+      background-color: #f9a11b;
+    }
+    .button[value="amazing"].current,
+    .button[value="amazing"]:hover {
+      background-color: #f26522;
+    }
 </style>
 <div class="is-centered">
 <div id="modal-js-example" class="modal">
@@ -22,15 +45,19 @@
         </div>
         </div>
         <div class="buttons is-justify-content-center">
-          <form action="/rate/movies/{{movie['id']}}" method="post">
+          <form id="rating" action="/rate/movies/{{movie['id']}}" method="post">
             <button name="rating" value="awful" class="button">Awful</button>
             <button name="rating" value="meh" class="button">Meh</button>
             <button name="rating" value="good" class="button">Good</button>
             <button name="rating" value="amazing" class="button">Amazing</button>
           </form>
-        </div>
+          <br>
+          </div>
+          <div class="clear is-justify-content-center">
+            <button form="rating" name="clear" value="true" class="button is-small is-fullwidth">Clear Rating</button>
+          </div>
     </div>
-    <button class="modal-close is-large" aria-label="close"></button>
+    <button form="" class="modal-close is-large" aria-label="close"></button>
 </div>
 </div>
 <!-- <button class="js-modal-trigger" data-target="modal-js-example">
@@ -80,5 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
       closeAllModals();
     }
   });
+
+  const selected = document.querySelector(`.button[value="{{ current_rating }}"]`)
+  if (selected) {
+    selected.classList.add('current')
+  }
+  else {
+    document.querySelector('.clear').style.display = "none"
+  }
 });
 </script>
