@@ -149,9 +149,11 @@
 <section class="section">
     <div class="container">
         <h3 class="title is-5">User ratings</h3>
+        <div class="columns">
         {% for rating in ratings %}
-        {% include "ratings_boxes.html" %}
+            {% include "ratings_boxes.html" %}
         {% endfor %}
+        </div>
     </div>
 </section>
 {% endif %}
@@ -179,5 +181,31 @@
     </div>
 </section>
 
+<div class="container has-text-centered">
+        <a class="button is-rounded is-white mobile-btn" target="_blank" href="https://vidsrc.xyz/embed/movie?tmdb={{ movie['id'] }}&ds_lang=es">
+            <span>Watch on</span>
+            <span class="icon">
+                <i class="fas fa-skull-crossbones"></i>
+            </span>
+        </a>
+</div>
+<style>
+
+.mobile-btn {
+    display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .mobile-btn {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+  }
+}
+</style>
 {% endblock %}
 

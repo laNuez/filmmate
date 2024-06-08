@@ -350,7 +350,7 @@ def rated(username):
         dict["title"] = response["title"]
         dict["id"] = response["id"]
         dict["rating"] = id["rating_value"]
-        # dict["rating_text"] = get_rating_text(data[1][0]["rating_value"])
+        dict["rating_text"] = get_rating_text(id["rating_value"])
         movie_list.append(dict)
     
     return render_template('rated.html', movies=movie_list)

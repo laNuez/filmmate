@@ -5,6 +5,22 @@
     .size, .cell {
         width: 200px;
     }
+    .lighter {
+        background-color: #193f4f;
+    }
+
+    .awful {
+        color: #869fb4;
+    }
+    .meh {
+        color: #99896d;
+    }
+    .good {
+        color: #f9a11b;
+    }
+    .amazing {
+        color: #f26522;
+    }
 </style>
 <section class="section">
     <div class="container">
@@ -25,7 +41,7 @@
                 <br>
                 {% for n in range(4) %}
                 {% if n < movie['rating'] %}
-                    <span class="icon is-small">
+                    <span class="icon is-small {{movie['rating_text']}}">
                         <i class="fas fa-star"></i>
                     </span>
                 {% else %}
