@@ -13,19 +13,17 @@
         <h2 class="title">Movies</h2>
         <hr>
         <h2 class="title is-4">Trending</h2>
-        <div class="fixed-grid has-5-cols">
-            <div class="grid">
+        <div class="grid is-col-min-8">
             {% for movie in movies %}
-            <div class="cell">
+            <div class="cell is-col-min-8">
                 <a href="/movies/{{movie['id']}}">
-                    <figure class="image is-16by9">
-                        <img src="{{movie['backdrop_path']}}" alt="">
+                    <figure class="fig_card image is-16by9">
+                        <img class="img_card" src="{{movie['backdrop_path']}}" alt="">
                     </figure>
                 </a>
                 {{movie["title"]}}
             </div>
             {% endfor %}
-            </div>
         </div>
         <!-- <h2 class="title is-4">Popular</h2>
         <div class="fixed-grid has-5-cols">
