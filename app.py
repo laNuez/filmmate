@@ -298,7 +298,6 @@ def add_to_movie_watchlist(id):
     return redirect(request.referrer)
 
 @app.route('/users/<username>/watchlist')
-@login_required
 def watchlist(username):
     if not username:
         return 'bruh'
