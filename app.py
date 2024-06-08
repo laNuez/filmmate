@@ -339,7 +339,7 @@ def search():
 def rated(username):
     data, count = supabase.from_('users').select('id').eq('username', username).execute()
     user_id = data[1][0]["id"]
-    data, count = supabase.from_('ratings').select('rated_item_id').eq('user_id', user_id).execute()
+    data, count = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id).execute()
 
     movie_list = []
     for id in data[1]:
@@ -349,6 +349,8 @@ def rated(username):
         dict["poster_path"] = "https://image.tmdb.org/t/p/w300/{}".format(response["poster_path"])
         dict["title"] = response["title"]
         dict["id"] = response["id"]
+        dict["rating"] = id["rating_value"]
+        # dict["rating_text"] = get_rating_text(data[1][0]["rating_value"])
         movie_list.append(dict)
     
     return render_template('rated.html', movies=movie_list)
