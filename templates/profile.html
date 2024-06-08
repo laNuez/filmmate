@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
+{% endblock %}
+
+{% block body %}
+<style>
+    .link:link, .link:visited, .link:active {
+        color: inherit;
+    }
+    .level-item {
+        width: 10rem;
+    }
+    .profile-img {
+        box-shadow: 0 0 0 2px #14161a;
+    }
+    #ratings-chart {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    #ratings-chart .column {
+        --color-1: #869fb4;
+        --color-2: #99896d;
+        --color-3: #f9a11b;
+        --color-4: #f26522;
+    }
+
+    #ratings-chart .legend {
+ 
+    }
+    div>table.table-color {
+        background-color: #252e34;
+    }
+    tr>th.th-color {
+        background-color: #33343d;
+    }
+    .row-radio {
+        border-radius: 5px;
+    }
+    .awful {
+        color: #869fb4;
+    }
+    .meh {
+        color: #99896d;
+    }
+    .good {
+        color: #f9a11b;
+    }
+    .amazing {
+        color: #f26522;
+    }
+    .column-wra {
+        background-color: #252e34;
+    }
+</style>
+<section class="hero is-primary">
+    <div class="hero-body">
+        <nav class="level is-mobile">
+            <div class="level-left">
+                <div class="level-item">
+                    <article class="media">
+                        <figure class="media-left">
+                          <p class="image is-64x64">
+                            <img class="is-rounded profile-img" src="https://robohash.org/{{username}}" />
+                          </p>
+                        </figure>
+                    </article>
+                    <div class="media-content">
+                        <div class="content">
+                            <p>
+                                <strong>@{{username}}</strong>
+                                <br>
+                                {% if username == session["username"] %}
+                                <a href="/settings" class="button">Edit profile</a>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="level-right">
+                
+                <a class="link" href="/users/{{username}}/rated">
+                <div class="level-item has-text-centered" style="border-right: 1px solid #383e43;">
+                    <div>
+                        <p class="heading">Ratings</p>
+                        <p class="title">{{info['rated'] | length}}</p>
+                    </div>
+                </div>
+                </a>
+                <a class="link" href="/users/{{username}}/watchlist">
+                <div class="level-item has-text-centered">
+                    <div>
+                        <p class="heading">Watchlist</p>
+                        <p class="title link">{{info['watchlist'] | length}}</p>
+                    </div>
+                </div>
+                </a>
+            </div>
+        </nav>
+    </div>
+</section>
+<style>
+    .size, .cell {
+        width: 200px;
+    }
+    .over {
+        overflow-x: scroll;
+    }
+</style>
+<section class="section">
+    <div class="container">
+        <h2 class="title is-4 link has-text-primary">
+            <a href="/users/{{username}}/rated">Recently Rated</a>
+        </h2>
+        <div class="columns over is-mobile">
+            {% if info['rated'] %}
+            {% for movie in info['rated'] %}
+            <div class="column is-narrow">
+                <a href="/movies/{{movie['id']}}">
+                    <div class="size">
+                        <figure class="image fig_card">
+                            <img class="img_card" src="{{movie['poster_path']}}" alt="">
+                        </figure>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+            {% endif %}
+            </div>
+        </div>
+</section>
+<section class="section">
+    <div class="container">
+        <h2 class="title is-4">
+            <a href="/users/{{username}}/watchlist">
+                Recently Saved
+            </a>
+        </h2>
+        <div class="columns over is-mobile">
+            {% if info['watchlist'] %}
+            {% for movie in info['watchlist'] %}
+            <div class="column is-narrow">
+                <a href="/movies/{{movie['id']}}">
+                    <div class="size">
+                        <figure class="image fig_card">
+                            <img class="img_card" src="{{movie['poster_path']}}" alt="">
+                        </figure>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+            {% endif %}
+            </div>
+        </div>
+</section>
+<section class="section">
+    <div class="container">
+        <h2 class="title is-5"><a class="link" href="/users/{{username}}/rated">Ratings</a></h2>
+        <div class="column-wra box is-shadowless">
+        <div class="columns is-vcentered">
+            <div class="column">
+                <div id="ratings-chart">
+                    <table class="table-color charts-css column show-labels data-spacing-5 data-outside">
+                        {% for rting, val in info['count'].items() %}
+                        <tr>
+                            <th class="th-color" scope="row"><span class="{{rting}} is-capitalized has-text-weight-light">{{rting}}</span></th>
+                            <td class="row-radio" style="--size: calc({{ val }} / {{info['rated'] | length}})">
+                                <span class="data {{rting}}">{{val}}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            <div class="column has-text-centered">
+                <h4 class="title is-4">{{info['rated'] | length}} Ratings</h4>
+                <h5 class="subtitle is-6">{{info['rated'] | length}} Movies.</h5>
+            </div>
+            <div class="column has-text-centered">
+                <h4 class="title is-4">{{ info['runtime_hours']}} hours watched</h4>
+                <h5 class="subtitle is-6">{{info['runtime_days']}} days</h5>
+            </div>
+        </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -152,6 +152,7 @@ def movies(id):
     dict["runtime"] = response["runtime"]
     dict["overview"] = response["overview"]
     dict["original_title"] = response["original_title"]
+    dict["title"] = response["title"]
     dict["poster_path"] = "https://image.tmdb.org/t/p/w300/{}".format(response["poster_path"])
     dict["cast"] = response["credits"]["cast"][:5]
     dict["id"] = response["id"]
@@ -360,3 +361,54 @@ def rated(username):
     
     return render_template('rated.html', movies=movie_list)
     
+@app.route('/users/<username>/')
+def profile(username):
+    
+    # watchlist
+    info = {
+        "watchlist": [],
+        "rated": [],
+        "count": {
+            "awful": 0,
+            "meh": 0,
+            "good": 0,
+            "amazing": 0
+        }
+    }
+    data, count = supabase.from_('users').select('id').eq('username', username).execute()
+    user_id = data[1][0]["id"]
+    # rated
+    data, count = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id).execute()
+    
+    for id in data[1]:
+        dict = {}
+        data = tmdb.Movies(id["rated_item_id"])
+        response = data.info(append_to_response="images")
+        dict["id"] = response["id"]
+        dict["poster_path"] = "https://image.tmdb.org/t/p/w300/{}".format(response["poster_path"])
+
+        rting = get_rating_text(id["rating_value"])
+        info["count"][rting] = info["count"].get(rting) + 1
+        info["rated"].append(dict)
+    
+    # watchlist
+    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', user_id).execute()
+    
+    for id in data[1]:
+        dict = {}
+        data = tmdb.Movies(id["movie_id"])
+        response = data.info(append_to_response="images")
+        dict["id"] = response["id"]
+        dict["poster_path"] = "https://image.tmdb.org/t/p/w300/{}".format(response["poster_path"])
+        
+        
+        
+        info['runtime_minutes'] = info.get('runtime_minutes', 0) + response["runtime"]      
+        info["watchlist"].append(dict)
+
+    # format runtime
+    runtime_hours = info['runtime_minutes'] / 60
+    info['runtime_hours'] = int(runtime_hours)
+    info['runtime_days'] = format(runtime_hours / 24, '.2f')
+    
+    return render_template('profile.html', username=username, info=info)
