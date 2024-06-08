@@ -1,0 +1,17 @@
+<footer class="footer">
+    <div class="container">
+        <div class="content">
+            <p class="has-text-grey"><strong>FilmMate</strong> · <span id="year"></span></p>
+            {% if session['username'] %}
+                <div class="has-text-primary">
+                    <a href="/users/{{ session['username'] }}" class="button is-white">
+                        <span class="has-text-primary has-text-weight-bold">Hi {{ session['username'] }}!</span>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</footer>
+<script>
+    document.querySelector('#year').textContent = new Date().getFullYear()
+</script>
