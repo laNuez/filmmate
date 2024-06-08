@@ -164,9 +164,9 @@
             {% for movie in similar %}
             <div class="cell">
                 <a href="/movies/{{movie['id']}}">
-                    <figure class="image is-16by9">
+                    <figure class="image is-16by9 fig_card">
                         {% if movie['backdrop_path'] %}
-                            <img src="{{movie['backdrop_path']}}" alt="">
+                            <img class="img_card" src="{{movie['backdrop_path']}}" alt="">
                         {% else %}
                             <img src="" alt="missing banner">
                         {% endif %}
