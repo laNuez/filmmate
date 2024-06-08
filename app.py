@@ -156,6 +156,9 @@ def movies(id):
     dict["cast"] = response["credits"]["cast"][:5]
     dict["id"] = response["id"]
     dict["director"] = 'unknown'
+    # i took the lambda from duckduckgo ai chat
+    minutes_to_hour_minutes = lambda total_minutes: f"{total_minutes // 60} hr {total_minutes % 60} min"
+    dict["runtime"] = minutes_to_hour_minutes(response["runtime"])
     a = response["credits"]["crew"]
     for x in a:
         if x['job'] == 'Director':
@@ -174,6 +177,8 @@ def movies(id):
     dict["writters"] = arr
     
     date_str = response["release_date"]
+    year = date_str.split('-')[0]
+    dict['year'] = year
     date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
     dict['formatted_date'] = date_obj.strftime('%B %d, %Y')
     
