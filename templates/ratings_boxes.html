@@ -1,4 +1,23 @@
-<div class="box">
+<style>
+    .lighter {
+        background-color: #193f4f;
+    }
+
+    .awful {
+        color: #869fb4;
+    }
+    .meh {
+        color: #99896d;
+    }
+    .good {
+        color: #f9a11b;
+    }
+    .amazing {
+        color: #f26522;
+    }
+</style>
+<div class="column is-narrow">
+<div class="box lighter is-shadowless">
 
     <article class="media">
         <figure class="media-left">
@@ -13,7 +32,7 @@
                     <br>
                     {% for n in range(4) %}
                         {% if n < rating['rating'] %}
-                            <span class="icon is-small">
+                            <span class="icon is-small {{rating['rating_text']}}">
                                 <i class="fas fa-star"></i>
                             </span>
                         {% else %}
@@ -26,4 +45,5 @@
             </div>
         </div>
     </article>
+</div>
 </div>
