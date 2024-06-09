@@ -27,14 +27,8 @@
         --color-4: #f26522;
     }
 
-    #ratings-chart .legend {
- 
-    }
     div>table.table-color {
         background-color: #252e34;
-    }
-    tr>th.th-color {
-        background-color: #33343d;
     }
     .row-radio {
         border-radius: 5px;
@@ -81,7 +75,7 @@
                 </div>
             </div>
 
-            <div class="level-right">
+            <div class="level-right desktop-levelish">
                 
                 <a class="link" href="/users/{{username}}/rated">
                 <div class="level-item has-text-centered" style="border-right: 1px solid #383e43;">
@@ -102,6 +96,42 @@
             </div>
         </nav>
     </div>
+</section>
+<style>
+    .mobile-level {
+        display: none;
+    }
+    div.desktop-levelish {
+        display: flex !important;
+    }
+    @media screen and (max-width: 768px) {
+    .mobile-level {
+        display: block;
+    }
+    div.desktop-levelish {
+        display: none !important;
+    }
+    }
+</style>
+<section class="mobile-level block" >
+    <nav class="level is-mobile" style="padding-top: 0.25rem;">
+        <a class="link level-item has-text-centered" href="/users/{{username}}/rated" style="border-right: 1px solid #383e43;"">
+        <!-- <div class="level-item has-text-centered" style="border-right: 1px solid #383e43;"> -->
+                <div>
+                    <p class="heading">Ratings</p>
+                    <p class="title">{{info['rated'] | length}}</p>
+                </div>
+            <!-- </div> -->
+        </a>
+        <a class="link level-item has-text-centered" href="/users/{{username}}/watchlist">
+            <!-- <div class="level-item has-text-centered"> -->
+                <div>
+                    <p class="heading">Watchlist</p>
+                    <p class="title link">{{info['watchlist'] | length}}</p>
+                </div>
+            <!-- </div> -->
+        </a>
+    </nav>
 </section>
 <style>
     .size, .cell {
@@ -133,7 +163,7 @@
             </div>
         </div>
 </section>
-<section class="section">
+<section class="section" style="padding-top: 0;">
     <div class="container">
         <h2 class="title is-4">
             <a href="/users/{{username}}/watchlist">
