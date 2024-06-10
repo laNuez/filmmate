@@ -223,6 +223,19 @@ def get_rating_text(rating: int):
         case _:
             return 'none'
 
+def get_rating_int(rating: str):
+    match rating:
+        case 'awful':
+            return 1
+        case "meh":
+            return 2   
+        case "good":
+            return 3
+        case "amazing":
+            return 4
+        case _:
+            return None
+        
 def get_username(user_id):
     
     data, count = supabase.from_('users').select('username').eq('id', user_id).execute()
@@ -345,8 +358,13 @@ def search():
 def rated(username):
     data, count = supabase.from_('users').select('id').eq('username', username).execute()
     user_id = data[1][0]["id"]
-    data, count = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id).execute()
-
+    query = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id)
+    
+    sort_by_rating = request.args.get('list')
+    if sort_by_rating:
+        query = query.eq('rating_value', get_rating_int(sort_by_rating))
+    
+    data, count = query.execute()
     movie_list = []
     for id in data[1]:
         dict = {}
@@ -359,7 +377,7 @@ def rated(username):
         dict["rating_text"] = get_rating_text(id["rating_value"])
         movie_list.append(dict)
     
-    return render_template('rated.html', movies=movie_list)
+    return render_template('rated.html', movies=movie_list, username=username, sort=sort_by_rating)
     
 @app.route('/users/<username>/')
 def profile(username):
@@ -378,7 +396,7 @@ def profile(username):
     data, count = supabase.from_('users').select('id').eq('username', username).execute()
     user_id = data[1][0]["id"]
     # rated
-    data, count = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id).execute()
+    data, count = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id).order('created_at', desc=True ).execute()
     
     for id in data[1]:
         dict = {}
@@ -392,7 +410,7 @@ def profile(username):
         info["rated"].append(dict)
     
     # watchlist
-    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', user_id).execute()
+    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', user_id).order('created_at', desc=True ).execute()
     
     for id in data[1]:
         dict = {}
@@ -412,3 +430,12 @@ def profile(username):
     info['runtime_days'] = format(runtime_hours / 24, '.2f')
     
     return render_template('profile.html', username=username, info=info)
+
+@app.route('/test')
+def test():
+    
+    data = tmdb.Movies(515001)
+    response = data.info(append_to_response="images")
+    for x in response['images']['backdrops']:
+        print(x)
+    return 'xd'
