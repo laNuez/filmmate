@@ -15,20 +15,25 @@
     .amazing {
         color: #f26522;
     }
+    .link:link, .link:visited, .link:active {
+        color: inherit;
+    }
 </style>
 <div class="column is-narrow">
 <div class="box lighter is-shadowless">
 
     <article class="media">
         <figure class="media-left">
-            <p class="image is-64x64">
-                <img loading="lazy" class="is-rounded" src="https://robohash.org/{{rating['username']}}" alt="user image profile" style="box-shadow: 0 0 0 2px #14161a;">
-            </p>
+            <a href="/users/{{rating['username']}}">
+                <p class="image is-64x64">
+                    <img loading="lazy" class="is-rounded" src="https://robohash.org/{{rating['username']}}" alt="user image profile" style="box-shadow: 0 0 0 2px #14161a;">
+                </p>
+            </a>
         </figure>
         <div class="media-content">
             <div class="content">
                 <p>
-                    <strong>@{{rating['username']}}</strong>
+                    <strong><a class="link" href="/users/{{rating['username']}}">@{{rating['username']}}</a></strong>
                     <br>
                     {% for n in range(4) %}
                         {% if n < rating['rating'] %}
