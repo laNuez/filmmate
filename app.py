@@ -434,6 +434,7 @@ def profile(username):
 
         rting = get_rating_text(id["rating_value"])
         info["count"][rting] = info["count"].get(rting) + 1
+        info['runtime_minutes'] = info.get('runtime_minutes', 0) + response["runtime"]
         info["rated"].append(dict)
     
     # watchlist
@@ -448,7 +449,6 @@ def profile(username):
         
         
         
-        info['runtime_minutes'] = info.get('runtime_minutes', 0) + response["runtime"]      
         info["watchlist"].append(dict)
 
     # format runtime
