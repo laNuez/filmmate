@@ -11,9 +11,9 @@ import os
 from supabase import create_client, Client
 from supabase.client import ClientOptions
 
-url = "https://bkfmmzqhbrrkhytyjrul.supabase.co"
-key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZm1tenFoYnJya2h5dHlqcnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3MDY3ODYsImV4cCI6MjAzMzI4Mjc4Nn0.jpkTshBGvMiPitAvG54VxFH90d_Cv8fMw1VcEtKiVj0"
-supabase: Client = create_client(url, key,
+SUPABASE_URL = "https://bkfmmzqhbrrkhytyjrul.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZm1tenFoYnJya2h5dHlqcnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3MDY3ODYsImV4cCI6MjAzMzI4Mjc4Nn0.jpkTshBGvMiPitAvG54VxFH90d_Cv8fMw1VcEtKiVj0"
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY,
   options=ClientOptions(
     postgrest_client_timeout=10,
     storage_client_timeout=10,
@@ -320,12 +320,19 @@ def add_to_movie_watchlist(id):
 def watchlist(username):
     if not username:
         return 'bruh'
-
-    data, count = supabase.from_('users').select('id').eq('username', username).execute()
-    data, count = supabase.from_('movie_watchlist').select('movie_id').eq('user_id', data[1][0]["id"]).execute()
     
-    if not data[1]:
-        return render_template("watchlist.html", watchlist=None)
+    data, count = supabase.from_('users').select('id').eq('username', username).execute()
+    user_id = data[1][0]["id"]
+    data, count = supabase.from_('movie_watchlist').select('movie_id', count='exact').eq('user_id', user_id).execute()
+    
+    d, c = supabase.from_('users').select('id, wallpaper').eq('username', username).execute()
+    wallpaper = d[1][0]["wallpaper"]
+    show_wallpaper = False
+    if wallpaper:
+        show_wallpaper = True
+    
+    hero_count = {"rated": 0, "watchlist": 0}
+    hero_count["watchlist"] = count[1]
     
     arr = []
     for id in data[1]:
@@ -342,7 +349,10 @@ def watchlist(username):
         dict["poster_path"] = "https://image.tmdb.org/t/p/w300/{}".format(movie["poster_path"])
         new_arr.append(dict)
     
-    return render_template("watchlist.html", watchlist=new_arr)
+    data, count = supabase.from_('ratings').select('rated_item_id, rating_value', count='exact').eq('user_id', user_id).execute()
+    hero_count["rated"] = count[1]
+    
+    return render_template("watchlist.html", watchlist=new_arr, username=username, hero_count=hero_count, wallpaper=wallpaper, show_wallpaper=show_wallpaper)
 
 @app.route("/search")
 @login_required    
@@ -358,13 +368,23 @@ def search():
 def rated(username):
     data, count = supabase.from_('users').select('id').eq('username', username).execute()
     user_id = data[1][0]["id"]
-    query = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id)
+    query = supabase.from_('ratings').select('rated_item_id, rating_value', count='exact').eq('user_id', user_id)
+    
+    d, c = supabase.from_('users').select('id, wallpaper').eq('username', username).execute()
+    wallpaper = d[1][0]["wallpaper"]
+    show_wallpaper = False
+    if wallpaper:
+        show_wallpaper = True
     
     sort_by_rating = request.args.get('list')
     if sort_by_rating:
         query = query.eq('rating_value', get_rating_int(sort_by_rating))
     
+    hero_count = {"rated": 0, "watchlist": 0}
     data, count = query.execute()
+    
+    hero_count["rated"] = count[1]
+    
     movie_list = []
     for id in data[1]:
         dict = {}
@@ -377,7 +397,10 @@ def rated(username):
         dict["rating_text"] = get_rating_text(id["rating_value"])
         movie_list.append(dict)
     
-    return render_template('rated.html', movies=movie_list, username=username, sort=sort_by_rating)
+    data, count = supabase.from_('movie_watchlist').select('movie_id', count='exact').eq('user_id', user_id).execute()
+    hero_count["watchlist"] = count[1]
+    
+    return render_template('rated.html', movies=movie_list, username=username, sort=sort_by_rating, hero_count=hero_count, wallpaper=wallpaper, show_wallpaper=show_wallpaper)
     
 @app.route('/users/<username>/')
 def profile(username):
@@ -393,7 +416,11 @@ def profile(username):
             "amazing": 0
         }
     }
-    data, count = supabase.from_('users').select('id').eq('username', username).execute()
+    data, count = supabase.from_('users').select('id, wallpaper').eq('username', username).execute()
+    wallpaper = data[1][0]["wallpaper"]
+    show_wallpaper = False
+    if wallpaper:
+        show_wallpaper = True
     user_id = data[1][0]["id"]
     # rated
     data, count = supabase.from_('ratings').select('rated_item_id, rating_value').eq('user_id', user_id).order('created_at', desc=True ).execute()
@@ -425,11 +452,11 @@ def profile(username):
         info["watchlist"].append(dict)
 
     # format runtime
-    runtime_hours = info['runtime_minutes'] / 60
+    runtime_hours = info.get('runtime_minutes', 0) / 60
     info['runtime_hours'] = int(runtime_hours)
     info['runtime_days'] = format(runtime_hours / 24, '.2f')
     
-    return render_template('profile.html', username=username, info=info)
+    return render_template('profile.html', username=username, info=info, wallpaper=wallpaper, show_wallpaper=show_wallpaper)
 
 @app.route('/test')
 def test():
@@ -439,3 +466,39 @@ def test():
     for x in response['images']['backdrops']:
         print(x)
     return 'xd'
+
+@app.route('/wallpaper', methods=["POST"])
+def wallpaper():
+
+    url = request.form.get('url')
+    print(url)
+    
+    if not url:
+        return 'bruh'
+        
+    supabase.table('users').update({"wallpaper": url}).eq('id', session['user_id']).execute()
+    return redirect(request.referrer)
+
+@app.route('/settings')
+@login_required
+def settings():
+    return render_template('settings.html')
+
+@app.route('/settings/cover')
+def settings_cover():
+    data, count = supabase.from_('ratings').select('rated_item_id', count='exact').eq('user_id', session['user_id']).eq('rating_value', 4).execute()
+    d, c = supabase.from_('users').select('wallpaper').eq('id', session['user_id']).execute()
+    current_bg = d[1][0]['wallpaper']
+    
+    movies = []
+
+    for id in data[1]:
+        dict = {}
+        data = tmdb.Movies(id["rated_item_id"])
+        response = data.info(append_to_response="images")
+        dict["id"] = response["id"]
+        dict["title"] = response["title"]
+        dict['image'] = response['images']['backdrops'][0]["file_path"]
+        movies.append(dict)
+
+    return render_template('cover.html', movies=movies, current_bg=current_bg)

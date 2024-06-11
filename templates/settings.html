@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<style>
+    .center {
+        width: 27.5vw;
+        background-color: #252e34;
+        padding: 1.5rem;
+    }
+    @media screen and (max-width: 768px) {
+        .center {
+            min-width: 50vw;
+        }
+    }
+</style>
+<section class="section">
+    <div class="container has-text-centered center settings box is-shadowless">
+        <div>
+            <h1 class="title">Settings</h1>
+            <a href="/settings/cover" class="button is-fullwidth">Cover</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

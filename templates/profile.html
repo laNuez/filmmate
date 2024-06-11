@@ -9,9 +9,6 @@
     .link:link, .link:visited, .link:active {
         color: inherit;
     }
-    .level-item {
-        width: 10rem;
-    }
     .profile-img {
         box-shadow: 0 0 0 2px #14161a;
     }
@@ -49,90 +46,7 @@
         background-color: #252e34;
     }
 </style>
-<section class="hero is-primary">
-    <div class="hero-body">
-        <nav class="level is-mobile">
-            <div class="level-left">
-                <div class="level-item">
-                    <article class="media">
-                        <figure class="media-left">
-                          <p class="image is-64x64">
-                            <img class="is-rounded profile-img" src="https://robohash.org/{{username}}" />
-                          </p>
-                        </figure>
-                    </article>
-                    <div class="media-content">
-                        <div class="content">
-                            <p>
-                                <strong>@{{username}}</strong>
-                                <br>
-                                {% if username == session["username"] %}
-                                <a href="/settings" class="button">Edit profile</a>
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="level-right desktop-levelish">
-                
-                <a class="link" href="/users/{{username}}/rated">
-                <div class="level-item has-text-centered" style="border-right: 1px solid #383e43;">
-                    <div>
-                        <p class="heading">Ratings</p>
-                        <p class="title">{{info['rated'] | length}}</p>
-                    </div>
-                </div>
-                </a>
-                <a class="link" href="/users/{{username}}/watchlist">
-                <div class="level-item has-text-centered">
-                    <div>
-                        <p class="heading">Watchlist</p>
-                        <p class="title link">{{info['watchlist'] | length}}</p>
-                    </div>
-                </div>
-                </a>
-            </div>
-        </nav>
-    </div>
-</section>
-<style>
-    .mobile-level {
-        display: none;
-    }
-    div.desktop-levelish {
-        display: flex !important;
-    }
-    @media screen and (max-width: 768px) {
-    .mobile-level {
-        display: block;
-    }
-    div.desktop-levelish {
-        display: none !important;
-    }
-    }
-</style>
-<section class="mobile-level block" >
-    <nav class="level is-mobile" style="padding-top: 0.25rem;">
-        <a class="link level-item has-text-centered" href="/users/{{username}}/rated" style="border-right: 1px solid #383e43;"">
-        <!-- <div class="level-item has-text-centered" style="border-right: 1px solid #383e43;"> -->
-                <div>
-                    <p class="heading">Ratings</p>
-                    <p class="title">{{info['rated'] | length}}</p>
-                </div>
-            <!-- </div> -->
-        </a>
-        <a class="link level-item has-text-centered" href="/users/{{username}}/watchlist">
-            <!-- <div class="level-item has-text-centered"> -->
-                <div>
-                    <p class="heading">Watchlist</p>
-                    <p class="title link">{{info['watchlist'] | length}}</p>
-                </div>
-            <!-- </div> -->
-        </a>
-    </nav>
-</section>
+{% include "profile_hero.html" %}
 <style>
     .size, .cell {
         width: 200px;

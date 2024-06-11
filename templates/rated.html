@@ -22,31 +22,29 @@
         color: #f26522;
     }
 </style>
-<div class="container">
-    Sort
-
-    <form class="form" action="/users/{{username}}/rated" id="sort_rating">
-        <div class="field">
-            <div class="control">
-                <div class="select">
-                    <select name="list" onchange="sort_rating.submit()">
-                        <option value="">All ratings</option>
-                        <option value="amazing">Amazing</option>
-                        <option value="good">Good</option>
-                        <option value="meh">Meh</option>
-                        <option value="awful">Awful</option>
-                    </select>
-                    <script>
-                        const xd = document.querySelector('option[value="{{sort}}"]')
-                        xd.setAttribute('selected',"")
-                    </script>
+{% include "profile_hero.html" %}
+<section class="section">
+    <div class="container">
+        <form class="form" action="/users/{{username}}/rated" id="sort_rating">
+            <div class="field">
+                <div class="control">
+                    <div class="select">
+                        <select name="list" onchange="sort_rating.submit()">
+                            <option value="">All ratings</option>
+                            <option value="amazing">Amazing</option>
+                            <option value="good">Good</option>
+                            <option value="meh">Meh</option>
+                            <option value="awful">Awful</option>
+                        </select>
+                        <script>
+                            const xd = document.querySelector('option[value="{{sort}}"]')
+                            xd.setAttribute('selected',"")
+                        </script>
+                    </div>
                 </div>
             </div>
-        </div>
-    </form>
-
-</div>
-<section class="section">
+        </form>
+    </div>
     <div class="container">
         <div class="block">
             <!-- <span>@{{session['username']}}</span> -->

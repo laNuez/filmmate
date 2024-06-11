@@ -1,0 +1,127 @@
+{% if show_wallpaper %}
+<style>
+    #hero {
+        --background-image-lazy: url(https://image.tmdb.org/t/p/original{{wallpaper}});
+        height: 25rem;
+        background-image: var(--background-image-lazy);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+    }
+    #hero-body {
+        background: linear-gradient(0deg, #00000088 30%, transparent 100%);
+
+        display: flex;
+        justify-content: space-between;
+    }
+    #hero {
+        /* background: linear-gradient(0deg, #00000088 30%, #ffffff44 100%) */
+    }
+    #level {
+        align-self: end;
+        width: 100%;
+    }
+</style>
+{% endif %}
+<section class="hero is-primary" id="hero">
+    <div class="hero-body" id="hero-body">
+        <nav class="level is-mobile" id="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <article class="media">
+                        <figure class="media-left">
+                          <p class="image is-64x64">
+                            <img class="is-rounded profile-img" src="https://robohash.org/{{username}}" />
+                          </p>
+                        </figure>
+                    </article>
+                    <div class="media-content">
+                        <div class="content">
+                            <p>
+                                <strong>@{{username}}</strong>
+                                <br>
+                                {% if username == session["username"] %}
+                                <a href="/settings" class="button ghost">Edit profile</a>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="level-right desktop-levelish">
+                
+                <a class="link" href="/users/{{username}}/rated">
+                <div class="level-item has-text-centered" style="border-right: 1px solid #383e43;">
+                    <div>
+                        <p class="heading has-text-grey-lighter">Ratings</p>
+                        {% if info %}
+                        <p class="title has-text-white">{{info['rated'] | length}}</p>
+                        {% else %}
+                        <p class="title has-text-white">{{hero_count["rated"]}}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                </a>
+                <a class="link" href="/users/{{username}}/watchlist">
+                <div class="level-item has-text-centered">
+                    <div>
+                        <p class="heading has-text-grey-lighter">Watchlist</p>
+                        {% if info %}
+                        <p class="title link has-text-white">{{info['watchlist'] | length}}</p>
+                        {% else %}
+                        <p class="title link has-text-white">{{hero_count["watchlist"]}}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                </a>
+            </div>
+        </nav>
+    </div>
+</section>
+<style>
+    .link:link, .link:visited, .link:active {
+        color: inherit;
+    }
+    .level-item {
+        width: 10rem;
+    }
+    .mobile-level {
+        display: none;
+    }
+    div.desktop-levelish {
+        display: flex !important;
+    }
+    @media screen and (max-width: 768px) {
+    .mobile-level {
+        display: block;
+    }
+    div.desktop-levelish {
+        display: none !important;
+    }
+    }
+</style>
+<section class="mobile-level block" >
+    <nav class="level is-mobile" style="padding-top: 0.25rem;">
+        <a class="link level-item has-text-centered" href="/users/{{username}}/rated" style="border-right: 1px solid #383e43;"">
+                <div>
+                    <p class="heading">Ratings</p>
+                    {% if info %}
+                    <p class="title">{{info['rated'] | length}}</p>
+                    {% else %}
+                    <p class="title">{{hero_count["rated"]}}</p>
+                    {% endif %}
+                </div>
+        </a>
+        <a class="link level-item has-text-centered" href="/users/{{username}}/watchlist">
+                <div>
+                    <p class="heading">Watchlist</p>
+                    {% if info %}
+                    <p class="title link">{{info['watchlist'] | length}}</p>
+                    {% else %}
+                    <p class="title link">{{hero_count["watchlist"]}}</p>
+                    {% endif %}
+                </div>
+        </a>
+    </nav>
+</section>
