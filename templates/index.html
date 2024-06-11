@@ -1,14 +1,87 @@
 {% extends "layout.html" %}
 
 {% block body %}
-<section class="section">
-    <div class="container">
-        <h1 class="title">
-            FilmMate
-        </h1>
-        <p class="subtitle">
-            Discover movies based on your preferences!
-        </p>
+<style>
+    .img-holder {
+        width: 500px;
+        height: 500px;
+        position: relative;
+    }
+    .img1 {
+        position: absolute;
+        height: 400px;
+        right: 0;
+        top: 0;
+    }
+    .img2 {
+        position: absolute;
+        height: 400px;
+        left: 0;
+        bottom: 0;
+    }
+    .hero-body {
+        display: block !important;
+    }
+    .hero-text {
+        margin-left: 5vh;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .img1:hover {
+        z-index: 1;
+    }
+    .mobile-imgs {
+        display: none;
+    }
+    @media screen and (max-width: 768px) {
+        .img-holder {
+            display: none;
+        }
+        .mobile-imgs {
+            display: block;
+
+        }
+        .mobile-imgs > img {
+            display: block;
+            margin: auto;
+            border-radius: .1rem;
+        }
+        .hero-text {
+            margin-left: 1rem;
+        }
+    }
+</style>
+<section class="hero is-fullheight">
+    <div class="hero-body">
+        <div class="columns ">
+            <div class="column">
+                <div class="hero-text">
+                    <p class="title">FilmMate</p>
+                    <p class="subtitle">Discover movies based on your preferences!</p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="img-holder">
+                  <img class="img1" loading="lazy" src="https://image.tmdb.org/t/p/original/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg" alt="">
+                  <img class="img2" loading="lazy" src="https://image.tmdb.org/t/p/original/mMA1qhBFgZX8O36qPPTC016kQl1.jpg" alt="">
+                </div>
+                <div class="mobile-imgs">
+                    <img width="300px" loading="lazy" src="https://image.tmdb.org/t/p/original/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg" alt="">
+                    <img width="300px" loading="lazy" src="https://image.tmdb.org/t/p/original/mMA1qhBFgZX8O36qPPTC016kQl1.jpg" alt="">
+                  </div>
+            </div>
+        </div>
     </div>
+</section>
+<section class="section">
+    <a href="/signup">
+        <div class="columns has-text-centered is-mobile">
+            <div class="column has-background-light has-text-black">Discover</div>
+            <div class="column has-background-light has-text-black">Watch</div>
+            <div class="column has-background-light has-text-black">Recommend</div>
+        </div>
+    </a>
 </section>
 {% endblock %}
