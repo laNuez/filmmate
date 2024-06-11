@@ -6,11 +6,9 @@
         width: 200px;
     }
 </style>
+{% include "profile_hero.html" %}
 <section class="section">
     <div class="container">
-        <div class="block">
-            <!-- <span>@{{session['username']}}</span> -->
-        </div>
         <div class="columns">
             {% if watchlist %}
             {% for movie in watchlist %}
