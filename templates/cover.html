@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<style>
+    .center {
+        width: 27.5vw;
+        background-color: #252e34;
+        padding: 1.5rem;
+    }
+    #img {
+        border-radius: 0.5rem;
+    }
+    @media screen and (max-width: 768px) {
+        .center {
+            min-width: 50vw;
+        }
+    }
+</style>
+<section class="section">
+    <div class="container has-text-centered center settings box is-shadowless">
+        <p class="title is-4">Cover photo</p>
+        <div class="block">
+            <div id="image-container">
+                <figure class="image is-16by9">
+                    {% if current_bg %}
+                    <img id="img" src="https://image.tmdb.org/t/p/w500{{current_bg}}" alt="">
+                    {% else %}
+                    <img id="img" src="" alt="">
+                    {% endif %}
+                </figure>
+            </div>
+        </div>
+        <form action="/wallpaper" id="wallpaper", method="post">
+            <div class="field">
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select id="select" name="url">
+                          <option value="">Select dropdown</option>
+                          {% for movie in movies %}
+                          <option value="{{movie['image']}}">{{movie['title']}}</option>
+                          {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="button is-fullwidth">Change</button>
+        </form>
+    </div>
+</section>
+<script>
+    const container = document.querySelector('#image-container')
+    const img = document.querySelector('#img')
+    const select = document.querySelector('#select')
+    select.addEventListener('change', (e) => {
+        selected = document.querySelector(`option[value="${e.target.value}"]`)
+                                          
+        url = `https://image.tmdb.org/t/p/w500${e.target.value}`
+        img.setAttribute('src', url)
+    })
+</script>
+{% endblock %}
