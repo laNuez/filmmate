@@ -524,14 +524,9 @@ def settings_cover():
 
 ## TODO duplicates and shit
 def recommendations_from_users():
-    data, count = supabase.from_('users').select('*').execute()
-    ratings, c = supabase.from_('ratings').select('*').execute()
+    ratings, c = supabase.from_('ratings').select('rated_item_id').execute()
 
-    to_print = [
-        {
-            
-        }
-    ]
+    to_print = []
     for x in ratings[1]:
         movie_dict = {}
         movie_dict['rating'] = get_rating(x['rated_item_id'])
