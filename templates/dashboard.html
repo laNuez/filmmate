@@ -12,6 +12,20 @@
     <div class="container">
         <h2 class="title">Movies</h2>
         <hr>
+        <h2 class="title is-4">Recommendations</h2>
+        <div class="grid is-col-min-8">
+            {% for movie in recommendations %}
+            <div class="cell is-col-min-8">
+                <a href="/movies/{{movie['id']}}">
+                    <figure class="fig_card image is-16by9">
+                        <img class="img_card" src="{{movie['backdrop_path']}}" alt="">
+                    </figure>
+                </a>
+                {{movie["title"]}}
+            </div>
+            {% endfor %}
+        </div>
+
         <h2 class="title is-4">Trending</h2>
         <div class="grid is-col-min-8">
             {% for movie in movies %}
