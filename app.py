@@ -7,7 +7,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from helpers import login_required
 
 # supa
-import os
 from supabase import create_client, Client
 from supabase.client import ClientOptions
 
@@ -523,36 +522,45 @@ def settings_cover():
 
 
 ## TODO duplicates and shit
+# duck chat helped me reduce the db call, why i didnt think of that -.-
 def recommendations_from_users():
-    ratings, c = supabase.from_('ratings').select('rated_item_id').execute()
+    ratings, c = supabase.from_('ratings').select('rated_item_id, rating_value').execute()
+
+    rating_dict = {}
+    for x in ratings[1]:
+        
+        item_id = x['rated_item_id']
+        rating_value = x['rating_value']
+
+        if item_id not in rating_dict:
+            rating_dict[item_id] = {'total_rating': 0, 'count': 0}
+        
+        rating_dict[item_id]['total_rating'] += rating_value
+        rating_dict[item_id]['count'] += 1
 
     to_print = []
-    for x in ratings[1]:
-        movie_dict = {}
-        movie_dict['rating'] = get_rating(x['rated_item_id'])
-        movie_dict['id'] = x['rated_item_id']
-        to_print.append(movie_dict)
-
+    for item_id, data in rating_dict.items():
+        weighted_rating = calculate_weighted_rating(data['total_rating'], data['count'])
+        to_print.append({'rating': weighted_rating, 'id': item_id})
+        
     list_sorted = sorted(to_print, key=lambda x: x.get('rating',0))
     
     return list_sorted[-8:]
 
-def get_rating(id):
-    r, c = supabase.from_('ratings').select('rating_value', count='exact').eq('rated_item_id', id).execute()
-    v = c[1] or 0
-    total = 0
-    for x in r[1]:
-        total = total + x['rating_value']
-    R = total / v
+def calculate_weighted_rating(total_rating, count):
     m = 1
     
-    r, c = supabase.from_('ratings').select('rating_value', count='exact').gt('rating_value', m).execute()
+    r, c = supabase.from_('ratings').select('rating_value').gt('rating_value', m).execute()
     cn = c[1] or 0
-    total = 0
-    for x in r[1]:
-        total = total + x['rating_value']
-    C = total / cn
+    if cn == 0:
+        C = 0
+    else:
+        total = 0
+        for x in r[1]:
+            total += x['rating_value']
+        C = total / cn
     
-    # weighted_rating = (v * R + m * C) / (v + m)
-    weighted_rating = (v * R + m * C) / (v + m)
+    R = total_rating / count
+    
+    weighted_rating = (count * R + m * C) / (count + m)
     return weighted_rating
