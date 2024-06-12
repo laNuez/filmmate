@@ -107,12 +107,12 @@ def dashboard():
     response = movies.info()
     movies_list = []
     for movie in response["results"]:
-        dict = {}
-        dict["id"] = movie["id"]
-        dict["title"] = movie["title"]
-        dict["backdrop_path"] = "https://image.tmdb.org/t/p/w500/{}".format(movie["backdrop_path"])
+        movie_dict = {}
+        movie_dict["id"] = movie["id"]
+        movie_dict["title"] = movie["title"]
+        movie_dict["backdrop_path"] = "https://image.tmdb.org/t/p/w500/{}".format(movie["backdrop_path"])
 
-        movies_list.append(dict)
+        movies_list.append(movie_dict)
     
     # popular = tmdb.Movies.popular(tmdb.Movies())
     # print(popular)
@@ -125,7 +125,25 @@ def dashboard():
         
     #     popular_list.append(dict)
     
-    return render_template("dashboard.html", movies=movies_list)
+    re = recommendations_from_users()
+    # duck chat to remove duplicates
+    unique_set = set(tuple(d.items()) for d in re)
+    recommendations = [dict(t) for t in unique_set]
+    recc_list = []
+    for movie in recommendations:
+        if not movie.get('id', None):
+            continue
+        
+        data = tmdb.Movies(movie['id'])
+        response = data.info(append_to_response="images")
+        movie_dict = {}
+        movie_dict["id"] = response["id"]
+        movie_dict["title"] = response["title"]
+        movie_dict["backdrop_path"] = "https://image.tmdb.org/t/p/w500/{}".format(response["backdrop_path"])
+
+        recc_list.append(movie_dict)
+    
+    return render_template("dashboard.html", movies=movies_list, recommendations=recc_list)
 
 @app.route("/movies/<id>")
 @login_required
@@ -502,3 +520,44 @@ def settings_cover():
         movies.append(dict)
 
     return render_template('cover.html', movies=movies, current_bg=current_bg)
+
+
+## TODO duplicates and shit
+def recommendations_from_users():
+    data, count = supabase.from_('users').select('*').execute()
+    ratings, c = supabase.from_('ratings').select('*').execute()
+
+    to_print = [
+        {
+            
+        }
+    ]
+    for x in ratings[1]:
+        movie_dict = {}
+        movie_dict['rating'] = get_rating(x['rated_item_id'])
+        movie_dict['id'] = x['rated_item_id']
+        to_print.append(movie_dict)
+
+    list_sorted = sorted(to_print, key=lambda x: x.get('rating',0))
+    
+    return list_sorted[-8:]
+
+def get_rating(id):
+    r, c = supabase.from_('ratings').select('rating_value', count='exact').eq('rated_item_id', id).execute()
+    v = c[1] or 0
+    total = 0
+    for x in r[1]:
+        total = total + x['rating_value']
+    R = total / v
+    m = 1
+    
+    r, c = supabase.from_('ratings').select('rating_value', count='exact').gt('rating_value', m).execute()
+    cn = c[1] or 0
+    total = 0
+    for x in r[1]:
+        total = total + x['rating_value']
+    C = total / cn
+    
+    # weighted_rating = (v * R + m * C) / (v + m)
+    weighted_rating = (v * R + m * C) / (v + m)
+    return weighted_rating
