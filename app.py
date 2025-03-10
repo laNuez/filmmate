@@ -126,10 +126,7 @@ def dashboard():
         
     #     popular_list.append(dict)
     
-    re = recommendations_from_users()
-    # duck chat to remove duplicates
-    unique_set = set(tuple(d.items()) for d in re)
-    recommendations = [dict(t) for t in unique_set]
+    recommendations = recommendations_from_users()
     recc_list = []
     for movie in recommendations:
         if not movie.get('id', None):
@@ -525,11 +522,8 @@ def settings_cover():
 
     return render_template('cover.html', movies=movies, current_bg=current_bg)
 
-
-## TODO duplicates and shit
-# duck chat helped me reduce the db call, why i didnt think of that -.-
 def recommendations_from_users():
-    ratings, c = supabase.from_('ratings').select('rated_item_id, rating_value').execute()
+    ratings, c = supabase.from_('ratings').select('rated_item_id, rating_value', count='exact').execute()
 
     rating_dict = {}
     for x in ratings[1]:
@@ -544,28 +538,26 @@ def recommendations_from_users():
         rating_dict[item_id]['count'] += 1
 
     to_print = []
+    C = mean_vote_for_movies(ratings, c)
     for item_id, data in rating_dict.items():
-        weighted_rating = calculate_weighted_rating(data['total_rating'], data['count'])
+        weighted_rating = calculate_weighted_rating(data['total_rating'], data['count'], C)
         to_print.append({'rating': weighted_rating, 'id': item_id})
         
-    list_sorted = sorted(to_print, key=lambda x: x.get('rating',0))
-    
-    return list_sorted[-8:]
+    list_sorted = sorted(to_print, key=lambda x: x['rating'], reverse=True)
+    return list_sorted[:8]
 
-def calculate_weighted_rating(total_rating, count):
-    m = 1
-    
-    r, c = supabase.from_('ratings').select('rating_value').gt('rating_value', m).execute()
-    cn = c[1] or 0
-    if cn == 0:
-        C = 0
-    else:
-        total = 0
-        for x in r[1]:
-            total += x['rating_value']
-        C = total / cn
+def calculate_weighted_rating(total_rating, count, C):
+    m = 2
     
     R = total_rating / count
     
     weighted_rating = (count * R + m * C) / (count + m)
     return weighted_rating
+
+def mean_vote_for_movies(r, c):
+    total = 0
+    for x in r[1]:
+        total += x['rating_value']
+    C = total / c[1]
+
+    return C
