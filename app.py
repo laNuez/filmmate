@@ -3,6 +3,8 @@ from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
 import requests
 from werkzeug.security import check_password_hash, generate_password_hash
+import os
+import re
 
 from helpers import login_required
 
@@ -10,8 +12,8 @@ from helpers import login_required
 from supabase import create_client, Client
 from supabase.client import ClientOptions
 
-SUPABASE_URL = "https://bkfmmzqhbrrkhytyjrul.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZm1tenFoYnJya2h5dHlqcnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc3MDY3ODYsImV4cCI6MjAzMzI4Mjc4Nn0.jpkTshBGvMiPitAvG54VxFH90d_Cv8fMw1VcEtKiVj0"
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY,
   options=ClientOptions(
     postgrest_client_timeout=10,
@@ -21,7 +23,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY,
 
 #tmdb
 import tmdbsimple as tmdb
-tmdb.API_KEY = 'bab3e0fcb6b0519d5d23a13251765ef6'
+tmdb.API_KEY = os.getenv("TMDB_API_KEY")
 tmdb.REQUESTS_TIMEOUT = 5 
 tmdb.REQUESTS_SESSION = requests.Session()
 
@@ -488,11 +490,14 @@ def test():
 def wallpaper():
 
     url = request.form.get('url')
-    print(url)
     
     if not url:
         return 'bruh'
-        
+    
+    pattern = r'^\/[a-zA-Z0-9]+\.jpg$'
+    if not bool(re.match(pattern, url)):
+        return 'bruh'
+
     supabase.table('users').update({"wallpaper": url}).eq('id', session['user_id']).execute()
     return redirect(request.referrer)
 
