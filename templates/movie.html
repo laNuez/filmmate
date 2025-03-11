@@ -15,6 +15,22 @@
         -webkit-box-orient: vertical;
         padding-right: 10px;
     }
+
+    .icon-color {
+        color: black
+    }
+
+    .text-color {
+        color: black;
+    }
+    @media (prefers-color-scheme: dark) {
+        .icon-color {
+            color: white;
+        }
+        .text-color {
+            color: white;
+        }
+    }
 </style>
 <section class="section">
     <div class="container">
@@ -44,7 +60,7 @@
         </div>
         <div class="block">
             <div class="buttons">
-                <a class="button is-white" target="_blank" href="https://vidsrc.xyz/embed/movie?tmdb={{ movie['id'] }}&ds_lang=es">
+                <a class="button is-light" target="_blank" href="https://vidsrc.xyz/embed/movie?tmdb={{ movie['id'] }}&ds_lang=es">
                     <span>Watch on</span>
                     <span class="icon">
                         <i class="fas fa-skull-crossbones"></i>
@@ -90,7 +106,7 @@
         <div class="block">
         <div class="columns">
             <div class="column is-three-fifths">
-                <h2 class="has-text-white">Starring</h2>
+                <h2 class="icon-color">Starring</h2>
                 <!-- thank you copilot -->
                 {% set star_names = [] %}
                 {% for star in movie['cast'] %}
@@ -99,11 +115,11 @@
                 {{ ', '.join(star_names) }}
             </div>
             <div class="column">
-                <h2 class="has-text-white">Directed By</h2>
+                <h2 class="icon-color">Directed By</h2>
                 {{ movie['director'] }}
             </div>
             <div class="column">
-                <h2 class="has-text-white">Written By</h2>
+                <h2 class="icon-color">Written By</h2>
                 {{ movie.writters | join(', ') }}
             </div>
         </div>
@@ -111,7 +127,7 @@
         <div class="columns">
             <div class="column">
                 <span class="icon-text">
-                    <span class="icon has-text-white">
+                    <span class="icon icon-color">
                       <i class="fas fa-film"></i>
                     </span>
                     <span>Genre</span>
@@ -128,16 +144,17 @@
         <div class="columns">
             <div class="column">
                 <span class="icon-text">
-                    <span class="icon has-text-white">
+                    <span class="icon icon-color">
                       <i class="far fa-calendar"></i>
                     </span>
                     <span>Release Date</span>
                 </span>
             </div>
             <div class="column">
-                <div class="tags right has-text-white">
-                    <time datetime="{{ movie['release_date'] }}"></time>
-                    <p>{{ movie['formatted_date'] }}</p>
+                <div class="tags right icon-color">
+                    <time datetime="{{ movie['release_date'] }}">
+                        {{ movie['formatted_date'] }}
+                    </time>
                 </div>
             </div>
         </div>
@@ -168,11 +185,11 @@
                         {% if movie['backdrop_path'] %}
                             <img loading="lazy" class="img_card" src="{{movie['backdrop_path']}}" alt="">
                         {% else %}
-                            <img loading="lazy" src="" alt="missing banner">
+                            <img loading="lazy" src="" alt="{{movie['title']}}">
                         {% endif %}
                     </figure>
                 </a>
-                <span class="has-text-white">{{movie["title"]}}</span>
+                <span class="text-color has-text-weight-medium">{{movie["title"]}}</span>
                 <br>
                 <div class="overflow">{{movie['overview']}}</div>
             </div>
@@ -182,7 +199,7 @@
 </section>
 
 <div class="container has-text-centered">
-        <a class="button is-rounded is-white mobile-btn" target="_blank" href="https://vidsrc.xyz/embed/movie?tmdb={{ movie['id'] }}&ds_lang=es">
+        <a class="button is-rounded is-light mobile-btn" target="_blank" href="https://vidsrc.xyz/embed/movie?tmdb={{ movie['id'] }}&ds_lang=es">
             <span>Watch on</span>
             <span class="icon">
                 <i class="fas fa-skull-crossbones"></i>
