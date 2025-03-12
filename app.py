@@ -392,27 +392,33 @@ def search():
 
 @app.route("/users/<username>/rated")
 def rated(username):
-    data, count = supabase.from_('users').select('id').eq('username', username).execute()
-    user_id = data[1][0]["id"]
-    query = supabase.from_('ratings').select('rated_item_id, rating_value', count='exact').eq('user_id', user_id)
+    query = (
+        supabase.table('users')
+        .select('wallpaper, ratings(rated_item_id, rating_value), movie_watchlist(movie_id)')
+        .filter('username', 'eq', username)
+    )
     
-    d, c = supabase.from_('users').select('id, wallpaper').eq('username', username).execute()
-    wallpaper = d[1][0]["wallpaper"]
+    sort_by_rating = request.args.get('list')
+    if sort_by_rating:
+        query = query.eq('ratings.rating_value', get_rating_int(sort_by_rating))
+    
+    response = query.execute()
+
+    if not response.data:
+        return 'bruh'
+    
+    wallpaper = response.data[0].get('wallpaper', None)
+    rated_list = response.data[0]['ratings']
+    watchlist_count = len(response.data[0]['movie_watchlist'])
+
     show_wallpaper = False
     if wallpaper:
         show_wallpaper = True
     
-    sort_by_rating = request.args.get('list')
-    if sort_by_rating:
-        query = query.eq('rating_value', get_rating_int(sort_by_rating))
-    
-    hero_count = {"rated": 0, "watchlist": 0}
-    data, count = query.execute()
-    
-    hero_count["rated"] = count[1]
+    hero_count = {"rated": len(rated_list), "watchlist": watchlist_count}
     
     movie_list = []
-    for id in data[1]:
+    for id in rated_list:
         dict = {}
         data = tmdb.Movies(id["rated_item_id"])
         response = data.info(append_to_response="images")
@@ -422,10 +428,7 @@ def rated(username):
         dict["rating"] = id["rating_value"]
         dict["rating_text"] = get_rating_text(id["rating_value"])
         movie_list.append(dict)
-    
-    data, count = supabase.from_('movie_watchlist').select('movie_id', count='exact').eq('user_id', user_id).execute()
-    hero_count["watchlist"] = count[1]
-    
+        
     return render_template('rated.html', movies=movie_list, username=username, sort=sort_by_rating, hero_count=hero_count, wallpaper=wallpaper, show_wallpaper=show_wallpaper)
     
 @app.route('/users/<username>/')
