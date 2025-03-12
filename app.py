@@ -487,15 +487,6 @@ def profile(username):
     
     return render_template('profile.html', username=username, info=info, wallpaper=wallpaper, show_wallpaper=show_wallpaper)
 
-@app.route('/test')
-def test():
-    
-    data = tmdb.Movies(515001)
-    response = data.info(append_to_response="images")
-    for x in response['images']['backdrops']:
-        print(x)
-    return 'xd'
-
 @app.route('/wallpaper', methods=["POST"])
 def wallpaper():
 
