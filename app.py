@@ -104,28 +104,10 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    movies = tmdb.Trending("movie")
-    response = movies.info()
-    movies_list = []
-    for movie in response["results"]:
-        movie_dict = {}
-        movie_dict["id"] = movie["id"]
-        movie_dict["title"] = movie["title"]
-        movie_dict["backdrop_path"] = "https://image.tmdb.org/t/p/w500/{}".format(movie["backdrop_path"])
+    trending_movies = fetch_trending_movies()
+    
+    # popular_movies = fetch_popular_movies()
 
-        movies_list.append(movie_dict)
-    
-    # popular = tmdb.Movies.popular(tmdb.Movies())
-    # print(popular)
-    # popular_list = []
-    # for entry in popular["results"]:
-    #     dict = {}
-    #     dict["id"] = entry["id"]
-    #     dict["title"] = entry["title"]
-    #     dict["backdrop_path"] = "https://image.tmdb.org/t/p/w500/{}".format(entry["backdrop_path"])    
-        
-    #     popular_list.append(dict)
-    
     recommendations = recommendations_from_users()
     recc_list = []
     for movie in recommendations:
@@ -141,7 +123,31 @@ def dashboard():
 
         recc_list.append(movie_dict)
     
-    return render_template("dashboard.html", movies=movies_list, recommendations=recc_list)
+    return render_template("dashboard.html", movies=trending_movies, recommendations=recc_list)
+
+def fetch_popular_movies():
+    movies = tmdb.Movies.popular(tmdb.Movies())
+    movies_list = [
+        {
+            "id": movie["id"],
+            "title": movie["title"],
+            "backdrop_path": f"https://image.tmdb.org/t/p/w500/{movie['backdrop_path']}"
+        }
+        for movie in movies["results"]
+    ]
+    return movies_list
+
+def fetch_trending_movies():
+    movies = tmdb.Trending("movie").info()
+    movies_list = [
+    {
+        "id": movie["id"],
+        "title": movie["title"],
+        "backdrop_path": f"https://image.tmdb.org/t/p/w500/{movie['backdrop_path']}"
+    }
+    for movie in movies["results"]
+    ]
+    return movies_list
 
 @app.route("/movies/<id>")
 @login_required
