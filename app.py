@@ -340,24 +340,28 @@ def add_to_movie_watchlist(id):
 
 @app.route('/users/<username>/watchlist')
 def watchlist(username):
-    if not username:
+    response = (
+        supabase.table('users')
+        .select('id, wallpaper, movie_watchlist(movie_id)')
+        .eq('username', username)
+        .execute()
+    )
+    if not response.data:
         return 'bruh'
     
-    data, count = supabase.from_('users').select('id').eq('username', username).execute()
-    user_id = data[1][0]["id"]
-    data, count = supabase.from_('movie_watchlist').select('movie_id', count='exact').eq('user_id', user_id).execute()
+    user_id = response.data[0]['id']
+    wallpaper = response.data[0].get('wallpaper', None)
+    watchlist = response.data[0]['movie_watchlist']
+    watchlist_count = len(response.data[0]['movie_watchlist'])
     
-    d, c = supabase.from_('users').select('id, wallpaper').eq('username', username).execute()
-    wallpaper = d[1][0]["wallpaper"]
     show_wallpaper = False
     if wallpaper:
         show_wallpaper = True
     
-    hero_count = {"rated": 0, "watchlist": 0}
-    hero_count["watchlist"] = count[1]
+    hero_count = {"rated": 0, "watchlist": watchlist_count}
     
     arr = []
-    for id in data[1]:
+    for id in watchlist:
         data = tmdb.Movies(id['movie_id'])
         response = data.info()
         arr.append(response)
